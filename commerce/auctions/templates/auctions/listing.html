@@ -1,0 +1,48 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>{{ listing.title }}</h2>
+    <p>{{ listing.description }}</p>
+    <p>Starting Bid: ${{ listing.starting_bid }}</p>
+    <p>Category: {{ listing.category }}</p>
+
+    {% if listing.image_url %}
+        <img src="{{ listing.image_url }}" alt="Listing Image" style="max-width: 300px;">
+    {% endif %}
+
+    {{ listing.is_active|yesno:"Active,Inactive" }}
+    
+    {% if listing.is_active %}
+        {% if user.is_authenticated %}
+            <form action="{% url 'place_bid' listing.id %}" method="post">
+                {% csrf_token %}
+                <label for="bid_amount">Place a Bid:</label>
+                <input type="number" id="bid_amount" name="bid_amount" step="0.01" required>
+                <button type="submit">Submit Bid</button>
+            </form>
+        {% else %}
+            <p>You must <a href="{% url 'login' %}">log in</a> to place a bid.</p>
+        {% endif %}
+    {% else %}
+        <p>This listing is closed.</p>
+    {% endif %}
+
+    <h3>Comments</h3>
+    {% if user.is_authenticated %}
+        <form action="{% url 'add_comment' listing.id %}" method="post">
+            {% csrf_token %}
+            <textarea name="content" rows="3" cols="50" placeholder="Add a comment..."></textarea>
+            <button type="submit">Post Comment</button>
+        </form>
+    {% else %}
+        <p><a href="{% url 'login' %}">Log in</a> to comment.</p>
+    {% endif %}
+
+    <ul>
+        {% for comment in listing.comments.all %}
+            <li>{{ comment.commenter.username }}: {{ comment.content }}</li>
+        {% empty %}
+            <li>No comments yet.</li>
+        {% endfor %}
+    </ul>
+{% endblock %}
