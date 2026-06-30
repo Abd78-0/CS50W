@@ -1,21 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <title>Search</title>
-    </head>
-    <body>
-        <div>
-            <a href="image.html" class="btn">Image Search</a> 
-            <a href="advanced.html" class="btn">Advanced Search</a> 
-        </div>
-        <div1>
-            <form action="https://google.com/search">
-                <input type="text" name="q">
-                <div2>
-                    <input type="submit" value="Google Search">
-                    <input type="submit" value="I'm Feeling Lucky">
-                </div2>
-            </form>
-        </div1>
-    </body>
+<head>
+  <meta charset="UTF-8">
+  <title>Google Search</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="top-links">
+    <a href="images.html">Image Search</a> | 
+    <a href="advanced.html">Advanced Search</a>
+  </div>
+  <form action="https://www.google.com/search" method="get">
+    <input type="text" name="q">
+    <div>
+      <button type="submit">Google Search</button>
+      <button type="submit" name="btnI">I'm Feeling Lucky</button>
+    </div>
+  </form>
+</body>
 </html>

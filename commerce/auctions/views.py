@@ -21,13 +21,10 @@ def index(request):
 
 def login_view(request):
     if request.method == "POST":
-
-        # Attempt to sign user in
         username = request.POST["username"]
         password = request.POST["password"]
         user = authenticate(request, username=username, password=password)
 
-        # Check if authentication successful
         if user is not None:
             login(request, user)
             return HttpResponseRedirect(reverse("index"))
@@ -57,7 +54,6 @@ def register(request):
                 "message": "Passwords must match."
             })
 
-        # Attempt to create new user
         try:
             user = User.objects.create_user(username, email, password)
             user.save()
@@ -77,7 +73,6 @@ def listing(request, listing_id):
     except Listing.DoesNotExist:
         return HttpResponse("Listing not found.", status=404)
 
-    # Render the listing page with the listing details
     return render(request, "auctions/listing.html", {
         "listing": listing
     })
@@ -91,7 +86,6 @@ def create_listing(request):
         image_url = request.POST.get("image_url", "")
         category = request.POST.get("category", "")
 
-        # Create a new listing
         listing = Listing(
             title=title,
             description=description,
@@ -107,8 +101,17 @@ def create_listing(request):
         return render(request, "auctions/create_listing.html")
     
 
+def watchlist(request):
+    if request.user.is_authenticated:
+        user_watchlist = request.user.watchlist.all()
+        return render(request, "auctions/watchlist.html", {
+            "watchlist": user_watchlist
+        })
+    else:
+        return HttpResponseRedirect(reverse("login"))
+    
+
 def categories(request):
-    # Fetch all unique categories from the listings
     categories = Listing.objects.values_list('category', flat=True).distinct()
 
     return render(request, "auctions/categories.html", {
@@ -116,7 +119,6 @@ def categories(request):
     })
 
 def category_listings(request, category_name):  
-    # Fetch all listings in the specified category
     listings = Listing.objects.filter(category=category_name, is_active=True)
 
     return render(request, "auctions/category_listings.html", {
@@ -129,10 +131,8 @@ def place_bid(request, listing_id):
         bid_amount = float(request.POST["bid_amount"])
         listing = Listing.objects.get(pk=listing_id)
 
-        # Check if the bid is higher than the current highest bid
         current_highest_bid = listing.current_highest_bid()
         if bid_amount > current_highest_bid:
-            # Create a new bid
             bid = Bid(
                 amount=bid_amount,
                 listing=listing,
@@ -159,7 +159,6 @@ def comment(request, listing_id):
         content = request.POST["content"]
         listing = Listing.objects.get(pk=listing_id)
 
-        # Create a new comment
         comment = Comment(
             content=content,
             listing=listing,
@@ -177,7 +176,6 @@ def add_comment(request, listing_id):
         content = request.POST["content"]
         listing = Listing.objects.get(pk=listing_id)
 
-        # Create a new comment
         comment = Comment(
             content=content,
             listing=listing,
