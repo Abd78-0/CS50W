@@ -4,14 +4,28 @@
     <h2>{{ listing.title }}</h2>
     <p>{{ listing.description }}</p>
     <p>Starting Bid: ${{ listing.starting_bid }}</p>
-    <p>Category: {{ listing.category }}</p>
+    <p>Current Price: ${{ listing.current_highest_bid }}</p>
+    <p>Category: {{ listing.category|default:"Uncategorized" }}</p>
 
     {% if listing.image_url %}
         <img src="{{ listing.image_url }}" alt="Listing Image" style="max-width: 300px;">
     {% endif %}
 
-    {{ listing.is_active|yesno:"Active,Inactive" }}
-    
+    <p>Status: {{ listing.is_active|yesno:"Active,Closed" }}</p>
+
+    {% if user.is_authenticated %}
+        <form action="{% url 'toggle_watchlist' listing.id %}" method="post">
+            {% csrf_token %}
+            <button type="submit">
+                {% if watchlisted %}Remove from Watchlist{% else %}Add to Watchlist{% endif %}
+            </button>
+        </form>
+    {% endif %}
+
+    {% if error_message %}
+        <p>{{ error_message }}</p>
+    {% endif %}
+
     {% if listing.is_active %}
         {% if user.is_authenticated %}
             <form action="{% url 'place_bid' listing.id %}" method="post">
@@ -20,11 +34,23 @@
                 <input type="number" id="bid_amount" name="bid_amount" step="0.01" required>
                 <button type="submit">Submit Bid</button>
             </form>
+
+            {% if user == listing.owner %}
+                <form action="{% url 'close_listing' listing.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit">Close Listing</button>
+                </form>
+            {% endif %}
         {% else %}
             <p>You must <a href="{% url 'login' %}">log in</a> to place a bid.</p>
         {% endif %}
     {% else %}
         <p>This listing is closed.</p>
+        {% if user_has_won %}
+            <p>You won this auction.</p>
+        {% elif listing.winner %}
+            <p>Winner: {{ listing.winner.username }}</p>
+        {% endif %}
     {% endif %}
 
     <h3>Comments</h3>

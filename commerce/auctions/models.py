@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -16,9 +18,17 @@ class Listing(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="listings")
+    winner = models.ForeignKey(User, on_delete=models.SET_NULL, related_name="won_listings", blank=True, null=True)
 
     def __str__(self):
         return self.title
+
+    def current_highest_bid(self):
+        highest = self.bids.order_by('-amount', '-created_at').first()
+        return highest.amount if highest else self.starting_bid
+
+    def current_price(self):
+        return self.current_highest_bid()
 
 class Watchlist(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="watchlist")

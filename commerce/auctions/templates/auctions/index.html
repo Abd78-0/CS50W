@@ -6,7 +6,20 @@
     <ul>
         {% for listing in listings %}
             <li>
-                <a href="{% url 'listing' listing.id %}">{{ listing.title }}</a> - ${{ listing.starting_bid }}
+                <a href="{% url 'listing' listing.id %}">{{ listing.title }}</a>
+                <p>{{ listing.description }}</p>
+                <p>Current price: ${{ listing.current_highest_bid }}</p>
+                {% if listing.image_url %}
+                    <img src="{{ listing.image_url }}" alt="{{ listing.title }}" style="max-width: 200px;">
+                {% endif %}
+                {% if user.is_authenticated %}
+                    <form action="{% url 'toggle_watchlist' listing.id %}" method="post" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit">
+                            {% if listing.id in watchlist_ids %}Remove from Watchlist{% else %}Add to Watchlist{% endif %}
+                        </button>
+                    </form>
+                {% endif %}
             </li>
         {% empty %}
             <li>No active listings available.</li>
